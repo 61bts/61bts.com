@@ -71,12 +71,40 @@
   </div>
   <script>
     $(function(){
+      const PrivateKey = window.bitshares_js.PrivateKey;
+      const TransactionBuilder = window.bitshares_js.TransactionBuilder;
+      const Apis = window.bitshares_ws.Apis;
       $('#submit').click((e) => {
-        const apiUrl = $('#api').val();
+        const api_url = $('#api').val();
         const wif = $('#wif').val();
+        const pKey = PrivateKey.fromWif(wif);
         const account_name = $('#account_name').val();
         const sign_key = $('#sign_key').val();
 
+        Apis.instance(api_url, true).init_promise.then(
+          res => {
+            console.log("connected to:", res[0].network_name, "network");
+            let tr = new TransactionBuilder();
+            tr.add_type_operation("update-witness", {
+              witness_name: account_name,
+              url: null,
+              block_signing_key: sign_key,
+              broadcast: true,
+            });
+            tr.set_required_fees().then(() => {
+              tr.add_signer(pKey, pKey.toPublicKey().toPublicKeyString());
+              console.log("serialized transaction:", tr.serialize().operations);
+              tr
+                .broadcast()
+                .then(() => {
+                    console.log("Broadcast success!");
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            });
+          }
+        );
       });
     });
   </script>
