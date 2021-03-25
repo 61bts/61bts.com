@@ -85,7 +85,7 @@
           res => {
             console.log("connected to:", res[0].network_name, "network");
             let tr = new TransactionBuilder();
-            tr.add_type_operation("update-witness", {
+            tr.add_type_operation("update_witness", {
               witness_name: account_name,
               url: null,
               block_signing_key: sign_key,
